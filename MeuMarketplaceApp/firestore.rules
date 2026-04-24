@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /anuncios/{anuncioId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth.uid == resource.data.usuarioId;
+    }
+    match /usuarios/{usuarioId} {
+      allow read: if request.auth != null && (request.auth.uid == usuarioId || request.auth.uid == resource.data.usuarioId);
+      allow create, update: if request.auth.uid == usuarioId;
+      allow delete: if false;
+    }
+    match /mensagens/{mensagemId} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == resource.data.deUsuarioId ||
+         request.auth.uid == resource.data.paraUsuarioId);
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+  }
+}
